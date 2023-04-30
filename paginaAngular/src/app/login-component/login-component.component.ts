@@ -18,7 +18,6 @@ export class LoginComponentComponent {
     this.crearFormulario();
   }
   revisarLogIn(){
-    console.log(this.formulario.value)
     this.http.post("http://127.0.0.1:8000/validate",this.formulario.value).subscribe((res)=> {
       console.log(res)
     })
