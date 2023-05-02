@@ -9,13 +9,15 @@ import { RegistroComponent } from './registro/registro.component';
 import { RouterLink } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http'
 import { ReactiveFormsModule } from '@angular/forms';
+import { InicioComponent } from './inicio/inicio.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponentComponent,
-    RegistroComponent
+    RegistroComponent,
+    InicioComponent
   ],
   imports: [
     BrowserModule,

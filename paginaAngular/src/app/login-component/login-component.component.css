@@ -19,3 +19,9 @@ input.ng-invalid{
     margin: auto;
     margin-top: 100px;
 }
+
+.error{
+    margin-left: 25%;
+    margin-right: 25%;
+    margin-top: 100px;
+}

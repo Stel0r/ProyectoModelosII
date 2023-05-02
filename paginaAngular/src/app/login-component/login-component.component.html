@@ -1,4 +1,6 @@
 <html>
+
+
   <div class = "form">
     <form [formGroup] = "formulario">
       <label class="form-label" >Email address</label>
@@ -8,6 +10,9 @@
 
       <button [disabled] = "!formulario.valid" class="btn btn-primary submit-button" (click) = "revisarLogIn()">Aceptar</button>
     </form>
+  </div>
+  <div *ngIf="this.error" class="alert alert-danger error" role="alert" >
+    {{this.mensajeError}}
   </div>
   <div class="registro-div text-center">
     <p>Aun no tienes una cuenta ? <a routerLink="/registro">registrate</a> hoy y conecta tu creatividad</p>
