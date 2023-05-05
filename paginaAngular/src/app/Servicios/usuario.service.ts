@@ -4,6 +4,14 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class UsuarioService {
-  UsuarioLogeado:string
+  UsuarioLogeado:string = "diego.felipe.gamez@gmail.com"
   constructor() { }
+
+  hayUsuarioLogeado(){
+    if(this.UsuarioLogeado != ""){
+      return true
+    }
+    return false
+  }
+
 }

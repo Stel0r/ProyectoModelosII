@@ -1,0 +1,30 @@
+.Welcome{
+    font-size: 20px;
+}
+
+.inicioBody{
+    margin-left: 15%;
+    margin-right: 15%;
+    margin-top: 100px;
+}
+
+.bocetos{
+    width: 30%;
+    overflow: hidden;
+}
+
+.bocetos-ventana{
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+.bottom-buttons{
+    display: flex;
+    justify-content: center;
+}
+
+.btn{
+    margin:10px;
+}

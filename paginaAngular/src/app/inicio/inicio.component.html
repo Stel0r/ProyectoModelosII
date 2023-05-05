@@ -1,1 +1,18 @@
-<p>inicio works!</p>
+
+<div class = "inicioBody">
+    <p class="Welcome">Bienvenido {{this.usuario}}!</p>
+    <div class="bocetos-ventana">
+        <div class="list-group bocetos">
+            <button type="button" class="list-group-item list-group-item-action active" (click) = "changeItem(1)">Boceto1</button>
+            <button type="button" class="list-group-item list-group-item-action" (click) = "changeItem(2)">Boceto2</button>
+            <button type="button" class="list-group-item list-group-item-action" (click) = "changeItem(3)">Boceto3</button>
+        </div>
+        <div>
+            <img src="https://cnnespanol.cnn.com/wp-content/uploads/2018/10/181018064715-01-food-meme-screengrab-restricted-exlarge-169.jpg?quality=100&strip=info" alt="">
+        </div>
+    </div>
+    <div class = "bottom-buttons">
+        <button class="btn btn-primary" routerLink ="/editor">Nuevo Boceto</button>
+        <button class="btn btn-primary">Eliminar Boceto</button>
+    </div>
+</div>

@@ -10,6 +10,8 @@ import { RouterLink } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http'
 import { ReactiveFormsModule } from '@angular/forms';
 import { InicioComponent } from './inicio/inicio.component';
+import { HeaderComponent } from './header/header.component';
+import { EditorComponent } from './editor/editor.component';
 
 
 @NgModule({
@@ -17,7 +19,9 @@ import { InicioComponent } from './inicio/inicio.component';
     AppComponent,
     LoginComponentComponent,
     RegistroComponent,
-    InicioComponent
+    InicioComponent,
+    HeaderComponent,
+    EditorComponent
   ],
   imports: [
     BrowserModule,

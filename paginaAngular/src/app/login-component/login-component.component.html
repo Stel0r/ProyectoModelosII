@@ -7,11 +7,10 @@
       <input type="text" class="form-control" formControlName="correo">
       <label class="form-label">Contraseña</label>
       <input type="password" class="form-control"  formControlName="password">
-
-      <button [disabled] = "!formulario.valid" class="btn btn-primary submit-button" (click) = "revisarLogIn()">Aceptar</button>
     </form>
+    <button [disabled] = "!formulario.valid" class="btn btn-primary submit-button" (click) = "revisarLogIn()">Aceptar</button>
   </div>
-  <div *ngIf="this.error" class="alert alert-danger error" role="alert" >
+  <div *ngIf="this.hayError" class="alert alert-danger error" role="alert" >
     {{this.mensajeError}}
   </div>
   <div class="registro-div text-center">
