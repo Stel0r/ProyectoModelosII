@@ -1,22 +1,24 @@
+
 .canvas{
-    
+    width: 100%;
+    aspect-ratio: 16/9;
     border: red dotted 2px;
-    margin-top: 50px;
 }
 
 .ventana{
     display: flex;
-    justify-content: center;
-    margin-left: 65px;
-    margin-right: 20%;
+    padding-left: 75px;
+    padding-right: 22%;
+    padding-top:25px;
+    background-color: transparent;
 }
 
 .barra-lateral{
     position: fixed;
     height: 100%;
     width: 60px;
-    background-color: gray;
     display: inline-block;
+    background-color: #212529;
     overflow-x: hidden;
 }
 
@@ -24,7 +26,7 @@
     position: fixed;
     height: 100%;
     width: 20%;
-    background-color: gray;
+    background-color: #212529;
     top: 56px;
     right: 0px;
 }

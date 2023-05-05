@@ -22,13 +22,9 @@ export class EditorComponent {
     console.log(this.canvas)
     this.context = canvasEl.getContext('2d')!;
   
-    if(window.innerWidth < 1300){
-      canvasEl.width = 720;
-    canvasEl.height = 405;
-    }else{
-      canvasEl.width = 1040;
-      canvasEl.height = 585;
-    }
+    canvasEl.width = 1920;
+    canvasEl.height = 1080;
+
     this.context.lineWidth = 5;
     this.context.lineJoin = 'round';
     this.context.lineCap = 'round';
@@ -42,7 +38,7 @@ export class EditorComponent {
   
     canvasEl.addEventListener('mousemove', (e: MouseEvent) => {
       if (this.drawing) {
-        this.draw(this.lastX, this.lastY, e.clientX - canvasEl.offsetLeft, e.clientY - canvasEl.offsetTop);
+        this.draw(this.translatedX(this.lastX),this.translatedY(this.lastY),this.translatedX(e.clientX - canvasEl.offsetLeft),this.translatedY(e.clientY - canvasEl.offsetTop));
         this.lastX = e.clientX - canvasEl.offsetLeft;
         this.lastY = e.clientY - canvasEl.offsetTop;
       }
@@ -58,11 +54,25 @@ export class EditorComponent {
   }
 
 
+  translatedX(x:number){
+    var rect = this.canvass.getBoundingClientRect();
+    var factor = this.canvass.width / rect.width;
+    return factor * (x);
+  }
+
+  translatedY(y:number){
+    var rect = this.canvass.getBoundingClientRect();
+    var factor = (this.canvass.height / rect.height);
+    return factor * (y );
+  }
+
   draw(x1:number, y1:number, x2:number, y2:number) {
     this.context.beginPath();
-    this.context.moveTo(x1, y1);
-    this.context.lineTo(x2, y2);
+    this.context.moveTo(x1,y1);
+    this.context.lineTo(x2,y2);
     this.context.stroke();
   }
+
+
   
 }
