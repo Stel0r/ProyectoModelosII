@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LogResponse } from '../Modelos/Response';
 import { Router } from '@angular/router';
-import { UsuarioService } from '../Servicios/usuario.service';
+import { UsuarioService } from '../Servicios/Usuarios/usuario.service';
 import { interval } from 'rxjs';
 
 

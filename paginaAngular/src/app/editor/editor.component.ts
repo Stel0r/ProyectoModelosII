@@ -3,7 +3,8 @@ import { Component, Input, ViewChild, ElementRef, HostListener, Directive } from
 import { MonoTypeOperatorFunction, fromEvent } from 'rxjs';
 import { Storage, StorageReference, deleteObject, getDownloadURL, ref, uploadBytes } from '@angular/fire/storage';
 import { doc, updateDoc, getFirestore, Firestore, DocumentReference, addDoc, setDoc } from '@angular/fire/firestore';
-import { UsuarioService } from '../Servicios/usuario.service';
+import { UsuarioService } from '../Servicios/Usuarios/usuario.service';
+import { FirebaseService } from '../Servicios/Firebase/firebase.service';
 
 
 @Component({
@@ -27,10 +28,10 @@ export class EditorComponent {
   lineWPincel: number = 5;
   lineWEraser: number = 10;
   lineColor: string = '#000000'
-  name: string = 'boceto1'
+  name: string = 'boceto2'
   firestore: Firestore
 
-  constructor(private storage: Storage, private usuarioService: UsuarioService) {
+  constructor(private storage: Storage, private usuarioService: UsuarioService,private firebaseService:FirebaseService) {
 
   }
 
@@ -44,6 +45,9 @@ export class EditorComponent {
 
     canvasEl.width = 1920;
     canvasEl.height = 1080;
+
+    this.context.fillStyle = "white"
+    this.context.fillRect(0,0,canvasEl.width,canvasEl.height)
 
     this.context.lineWidth = this.lineWPincel;
     this.context.lineJoin = 'round';
@@ -152,34 +156,12 @@ export class EditorComponent {
     }
   }
 
-  async guardarCambios() {
-    let f: File;
-    let url: string
-    let docRef: DocumentReference
-    let update: any = {}
-    this.canvass.toBlob(async (blob) => {
-      deleteObject(ref(this.storage, 'Users/' + this.usuarioService.UsuarioLogeado + '/' + this.name + ".png")).catch((error) => {
-        console.log("creando nuevo Registro de Boceto")
-      })
-
-      if (blob) {
-        f = new File([blob], this.name + ".png", { type: 'image/png' })
-        let imgRef: StorageReference = ref(this.storage, 'Users/' + this.usuarioService.UsuarioLogeado + '/' + f.name)
-        uploadBytes(imgRef, f).then(async (snapshot) => {
-          getDownloadURL(snapshot.ref).then((url) => {
-            console.log(url)
-            update[this.name] = url
-            docRef = doc(this.firestore, 'Usuarios', this.usuarioService.UsuarioLogeado)
-            updateDoc(docRef, update).catch((error) => {
-              setDoc(docRef, update)
-            });
-            console.log('se ha actualizado la base')
-          })
-        })
+  guardarCambios() {
+    this.canvass.toBlob((blob) =>{
+      if(blob){
+        this.firebaseService.guardarCambios(blob,this.name)
       }
-    });
-
-
+    })
 
   }
 }
