@@ -1,3 +1,4 @@
+import { ThisReceiver } from '@angular/compiler';
 import { Component, Input, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { MonoTypeOperatorFunction, fromEvent } from 'rxjs';
 import { map, tap, switchMap, takeUntil, finalize } from 'rxjs/operators';
@@ -15,25 +16,35 @@ export class EditorComponent {
   lastX:number
   lastY:number
   canvass:HTMLCanvasElement
+  canvasBackup: Array<string> = new Array<string>
+  canvasState: string = ''
+
+  //variables del editor
+  tool:string = "pencil"
+  lineWPincel : number = 5;
+  lineWEraser: number = 10;
+  lineColor:string = '#000000'
 
   ngAfterViewInit() {
     const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
     this.canvass = canvasEl;
     console.log(this.canvas)
     this.context = canvasEl.getContext('2d')!;
+    this.canvasState = canvasEl.toDataURL();
   
     canvasEl.width = 1920;
     canvasEl.height = 1080;
 
-    this.context.lineWidth = 5;
+    this.context.lineWidth = this.lineWPincel;
     this.context.lineJoin = 'round';
     this.context.lineCap = 'round';
-    this.context.strokeStyle = '#000000';
+    this.context.strokeStyle = this.lineColor;
   
     canvasEl.addEventListener('mousedown', (e: MouseEvent) => {
       this.drawing = true;
       this.lastX = e.clientX - canvasEl.offsetLeft;
       this.lastY = e.clientY - canvasEl.offsetTop;
+      this.draw(this.translatedX(this.lastX),this.translatedY(this.lastY),this.translatedX(e.clientX - canvasEl.offsetLeft),this.translatedY(e.clientY - canvasEl.offsetTop));
     });
   
     canvasEl.addEventListener('mousemove', (e: MouseEvent) => {
@@ -45,7 +56,11 @@ export class EditorComponent {
     });
   
     canvasEl.addEventListener('mouseup', () => {
-      this.drawing = false;
+      this.drawing= false
+      let c = this.canvass.toDataURL();
+      this.canvasBackup.push(this.canvasState);
+      this.canvasState = c;
+      
     });
   
     canvasEl.addEventListener('mouseleave', () => {
@@ -63,7 +78,7 @@ export class EditorComponent {
   translatedY(y:number){
     var rect = this.canvass.getBoundingClientRect();
     var factor = (this.canvass.height / rect.height);
-    return factor * (y );
+    return factor * (y);
   }
 
   draw(x1:number, y1:number, x2:number, y2:number) {
@@ -73,6 +88,57 @@ export class EditorComponent {
     this.context.stroke();
   }
 
+  cambiarColor(){
+    this.context.strokeStyle = this.lineColor;
+  }
 
+  subirTamanoPincel(){
+    this.lineWPincel ++
+    this.context.lineWidth = this.lineWPincel
+  }
   
+  bajarTamanoPincel(){
+    this.lineWPincel --
+    this.context.lineWidth = this.lineWPincel
+  }
+
+  subirTamanoEraser(){
+    this.lineWEraser ++
+    this.context.lineWidth = this.lineWEraser
+  }
+  
+  bajarTamanoEraser(){
+    this.lineWEraser --
+    this.context.lineWidth = this.lineWEraser
+  }
+
+  revisarHerramienta(herr:string){
+    return herr == this.tool
+  }
+
+  cambiarHerramienta(herr:string){
+    this.tool = herr
+    if (herr == 'pencil'){
+      this.context.strokeStyle = this.lineColor
+      this.context.lineWidth = this.lineWPincel
+    }else if (herr == 'eraser'){
+      this.context.strokeStyle = '#ffffff'
+      this.context.lineWidth = this.lineWEraser
+    }
+  }
+
+  undo(){
+    this.canvasState = ''
+    let c  = this.canvasBackup.pop()
+    console.log(c)
+    if (c != undefined){
+      let img = new Image
+      let ctx = this.canvass.getContext('2d')!
+      ctx.clearRect(0,0,this.canvass.width,this.canvass.height)
+      img.onload = function(){
+        ctx.drawImage(img,0,0); // Or at whatever offset you like
+      };
+      img.src = c;
+    }
+  }
 }

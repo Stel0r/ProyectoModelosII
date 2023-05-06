@@ -1,10 +1,33 @@
-
-<div class = "barra-lateral">
-    <button></button>
+<div class="fondo"><p></p></div>
+<div class = "botones-superiores bg-dark">
+    <a class = 'boton-superior' [href] = "this.canvasState" download>Descargar</a>
+    <a class = 'boton-superior'>Invitar</a>
 </div>
-<div class = "ventana">
+<div class="barra-lateral">
+    <div class="panel-izq">
+        <button (click) = "this.cambiarHerramienta('pencil')" class="tool-button tool-active" [class.tool-active] = "this.revisarHerramienta('pencil')"><img src="assets/svg/brush.svg" alt="" class="pencil-img"></button>
+        <div *ngIf ="this.revisarHerramienta('pencil')" class="pencil-options-size">
+            <span class="pencil-size">{{this.lineWPincel}}</span>
+            <button class="pencil-op-right" (click) = "bajarTamanoPincel()"></button>
+            <button class="pencil-op-left" (click) = "subirTamanoPincel()"></button>
+        </div>
+        <div class="pencil-options-color" *ngIf ="this.revisarHerramienta('pencil')">
+            <input type="color" class="pencil-color-picker" (ngModelChange) = 'this.cambiarColor()' [(ngModel)]="this.lineColor">
+        </div>
+        <button class="tool-button" (click) = "this.cambiarHerramienta('eraser')" [class.tool-active] = "this.revisarHerramienta('eraser')"><img src="assets/svg/eraser.svg" alt="" class="pencil-img"></button>
+        <div *ngIf ="this.revisarHerramienta('eraser')" class="pencil-options-size">
+            <span class="pencil-size">{{this.lineWEraser}}</span>
+            <button class="pencil-op-right" (click) = "bajarTamanoEraser()"></button>
+            <button class="pencil-op-left" (click) = "subirTamanoEraser()"></button>
+        </div>
+        <button class="tool-button undo" (click) = 'this.undo()'><img src="assets/svg/undo.svg" alt="" class="pencil-img"></button>
+    </div>
+</div>
+<div class="ventana">
     <canvas class="canvas" #myCanvas></canvas>
 </div>
-<div class = "barra-usuarios" >
-    <button></button>
+<div class="barra-usuarios">
+    <div class="panel-der">
+        <button></button>
+    </div>
 </div>
