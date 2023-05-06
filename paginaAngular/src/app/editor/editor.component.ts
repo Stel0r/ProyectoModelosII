@@ -1,7 +1,9 @@
 import { ThisReceiver } from '@angular/compiler';
 import { Component, Input, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { MonoTypeOperatorFunction, fromEvent } from 'rxjs';
-import { map, tap, switchMap, takeUntil, finalize } from 'rxjs/operators';
+import { Storage,StorageReference,deleteObject,getDownloadURL,ref,uploadBytes } from '@angular/fire/storage';
+import { UsuarioService } from '../Servicios/usuario.service';
+
 
 @Component({
   selector: 'app-editor',
@@ -24,6 +26,11 @@ export class EditorComponent {
   lineWPincel : number = 5;
   lineWEraser: number = 10;
   lineColor:string = '#000000'
+  name:string = 'boceto1'
+
+  constructor(private storage:Storage, private usuarioService:UsuarioService){
+
+  }
 
   ngAfterViewInit() {
     const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
@@ -128,17 +135,38 @@ export class EditorComponent {
   }
 
   undo(){
-    this.canvasState = ''
     let c  = this.canvasBackup.pop()
     console.log(c)
     if (c != undefined){
       let img = new Image
       let ctx = this.canvass.getContext('2d')!
+      this.canvasState = c
       ctx.clearRect(0,0,this.canvass.width,this.canvass.height)
       img.onload = function(){
         ctx.drawImage(img,0,0); // Or at whatever offset you like
       };
       img.src = c;
     }
+  }
+
+  guardarCambios(){
+    let f:File;
+    let url: string
+    this.canvass.toBlob(async (blob) =>{
+      deleteObject(ref(this.storage,'Users/'+this.usuarioService.UsuarioLogeado+'/'+this.name+".png")).catch((error)=>{
+        console.log("creando nuevo Registro de Boceto")
+      })
+
+      if(blob){
+        f  = new File([blob],this.name+".png",{type:'image/png'})
+        let imgRef :StorageReference= ref(this.storage,'Users/'+this.usuarioService.UsuarioLogeado+'/'+f.name)
+        uploadBytes(imgRef,f).then(async ( snapshot)=>{
+          url = await getDownloadURL(snapshot.ref)
+        })
+      }
+    });
+
+    
+
   }
 }
