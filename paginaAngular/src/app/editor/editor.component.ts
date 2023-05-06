@@ -1,7 +1,8 @@
 import { ThisReceiver } from '@angular/compiler';
-import { Component, Input, ViewChild, ElementRef, HostListener } from '@angular/core';
+import { Component, Input, ViewChild, ElementRef, HostListener, Directive } from '@angular/core';
 import { MonoTypeOperatorFunction, fromEvent } from 'rxjs';
-import { Storage,StorageReference,deleteObject,getDownloadURL,ref,uploadBytes } from '@angular/fire/storage';
+import { Storage, StorageReference, deleteObject, getDownloadURL, ref, uploadBytes } from '@angular/fire/storage';
+import { doc, updateDoc, getFirestore, Firestore, DocumentReference, addDoc, setDoc } from '@angular/fire/firestore';
 import { UsuarioService } from '../Servicios/usuario.service';
 
 
@@ -11,34 +12,36 @@ import { UsuarioService } from '../Servicios/usuario.service';
   styleUrls: ['./editor.component.css']
 })
 export class EditorComponent {
-  @ViewChild('myCanvas', {static: true}) canvas: ElementRef;
+  @ViewChild('myCanvas', { static: true }) canvas: ElementRef;
 
-  context:CanvasRenderingContext2D
-  drawing:boolean
-  lastX:number
-  lastY:number
-  canvass:HTMLCanvasElement
+  context: CanvasRenderingContext2D
+  drawing: boolean
+  lastX: number
+  lastY: number
+  canvass: HTMLCanvasElement
   canvasBackup: Array<string> = new Array<string>
   canvasState: string = ''
 
   //variables del editor
-  tool:string = "pencil"
-  lineWPincel : number = 5;
+  tool: string = "pencil"
+  lineWPincel: number = 5;
   lineWEraser: number = 10;
-  lineColor:string = '#000000'
-  name:string = 'boceto1'
+  lineColor: string = '#000000'
+  name: string = 'boceto1'
+  firestore: Firestore
 
-  constructor(private storage:Storage, private usuarioService:UsuarioService){
+  constructor(private storage: Storage, private usuarioService: UsuarioService) {
 
   }
 
   ngAfterViewInit() {
+    this.firestore = getFirestore();
     const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
     this.canvass = canvasEl;
     console.log(this.canvas)
     this.context = canvasEl.getContext('2d')!;
     this.canvasState = canvasEl.toDataURL();
-  
+
     canvasEl.width = 1920;
     canvasEl.height = 1080;
 
@@ -46,127 +49,137 @@ export class EditorComponent {
     this.context.lineJoin = 'round';
     this.context.lineCap = 'round';
     this.context.strokeStyle = this.lineColor;
-  
+
     canvasEl.addEventListener('mousedown', (e: MouseEvent) => {
       this.drawing = true;
       this.lastX = e.clientX - canvasEl.offsetLeft;
       this.lastY = e.clientY - canvasEl.offsetTop;
-      this.draw(this.translatedX(this.lastX),this.translatedY(this.lastY),this.translatedX(e.clientX - canvasEl.offsetLeft),this.translatedY(e.clientY - canvasEl.offsetTop));
+      this.draw(this.translatedX(this.lastX), this.translatedY(this.lastY), this.translatedX(e.clientX - canvasEl.offsetLeft), this.translatedY(e.clientY - canvasEl.offsetTop));
     });
-  
+
     canvasEl.addEventListener('mousemove', (e: MouseEvent) => {
       if (this.drawing) {
-        this.draw(this.translatedX(this.lastX),this.translatedY(this.lastY),this.translatedX(e.clientX - canvasEl.offsetLeft),this.translatedY(e.clientY - canvasEl.offsetTop));
+        this.draw(this.translatedX(this.lastX), this.translatedY(this.lastY), this.translatedX(e.clientX - canvasEl.offsetLeft), this.translatedY(e.clientY - canvasEl.offsetTop));
         this.lastX = e.clientX - canvasEl.offsetLeft;
         this.lastY = e.clientY - canvasEl.offsetTop;
       }
     });
-  
+
     canvasEl.addEventListener('mouseup', () => {
-      this.drawing= false
+      this.drawing = false
       let c = this.canvass.toDataURL();
       this.canvasBackup.push(this.canvasState);
       this.canvasState = c;
-      
+
     });
-  
+
     canvasEl.addEventListener('mouseleave', () => {
       this.drawing = false;
     });
   }
 
 
-  translatedX(x:number){
+  translatedX(x: number) {
     var rect = this.canvass.getBoundingClientRect();
     var factor = this.canvass.width / rect.width;
     return factor * (x);
   }
 
-  translatedY(y:number){
+  translatedY(y: number) {
     var rect = this.canvass.getBoundingClientRect();
     var factor = (this.canvass.height / rect.height);
     return factor * (y);
   }
 
-  draw(x1:number, y1:number, x2:number, y2:number) {
+  draw(x1: number, y1: number, x2: number, y2: number) {
     this.context.beginPath();
-    this.context.moveTo(x1,y1);
-    this.context.lineTo(x2,y2);
+    this.context.moveTo(x1, y1);
+    this.context.lineTo(x2, y2);
     this.context.stroke();
   }
 
-  cambiarColor(){
+  cambiarColor() {
     this.context.strokeStyle = this.lineColor;
   }
 
-  subirTamanoPincel(){
-    this.lineWPincel ++
-    this.context.lineWidth = this.lineWPincel
-  }
-  
-  bajarTamanoPincel(){
-    this.lineWPincel --
+  subirTamanoPincel() {
+    this.lineWPincel++
     this.context.lineWidth = this.lineWPincel
   }
 
-  subirTamanoEraser(){
-    this.lineWEraser ++
-    this.context.lineWidth = this.lineWEraser
+  bajarTamanoPincel() {
+    this.lineWPincel--
+    this.context.lineWidth = this.lineWPincel
   }
-  
-  bajarTamanoEraser(){
-    this.lineWEraser --
+
+  subirTamanoEraser() {
+    this.lineWEraser++
     this.context.lineWidth = this.lineWEraser
   }
 
-  revisarHerramienta(herr:string){
+  bajarTamanoEraser() {
+    this.lineWEraser--
+    this.context.lineWidth = this.lineWEraser
+  }
+
+  revisarHerramienta(herr: string) {
     return herr == this.tool
   }
 
-  cambiarHerramienta(herr:string){
+  cambiarHerramienta(herr: string) {
     this.tool = herr
-    if (herr == 'pencil'){
+    if (herr == 'pencil') {
       this.context.strokeStyle = this.lineColor
       this.context.lineWidth = this.lineWPincel
-    }else if (herr == 'eraser'){
+    } else if (herr == 'eraser') {
       this.context.strokeStyle = '#ffffff'
       this.context.lineWidth = this.lineWEraser
     }
   }
 
-  undo(){
-    let c  = this.canvasBackup.pop()
+  undo() {
+    let c = this.canvasBackup.pop()
     console.log(c)
-    if (c != undefined){
+    if (c != undefined) {
       let img = new Image
       let ctx = this.canvass.getContext('2d')!
       this.canvasState = c
-      ctx.clearRect(0,0,this.canvass.width,this.canvass.height)
-      img.onload = function(){
-        ctx.drawImage(img,0,0); // Or at whatever offset you like
+      ctx.clearRect(0, 0, this.canvass.width, this.canvass.height)
+      img.onload = function () {
+        ctx.drawImage(img, 0, 0); // Or at whatever offset you like
       };
       img.src = c;
     }
   }
 
-  guardarCambios(){
-    let f:File;
+  async guardarCambios() {
+    let f: File;
     let url: string
-    this.canvass.toBlob(async (blob) =>{
-      deleteObject(ref(this.storage,'Users/'+this.usuarioService.UsuarioLogeado+'/'+this.name+".png")).catch((error)=>{
+    let docRef: DocumentReference
+    let update: any = {}
+    this.canvass.toBlob(async (blob) => {
+      deleteObject(ref(this.storage, 'Users/' + this.usuarioService.UsuarioLogeado + '/' + this.name + ".png")).catch((error) => {
         console.log("creando nuevo Registro de Boceto")
       })
 
-      if(blob){
-        f  = new File([blob],this.name+".png",{type:'image/png'})
-        let imgRef :StorageReference= ref(this.storage,'Users/'+this.usuarioService.UsuarioLogeado+'/'+f.name)
-        uploadBytes(imgRef,f).then(async ( snapshot)=>{
-          url = await getDownloadURL(snapshot.ref)
+      if (blob) {
+        f = new File([blob], this.name + ".png", { type: 'image/png' })
+        let imgRef: StorageReference = ref(this.storage, 'Users/' + this.usuarioService.UsuarioLogeado + '/' + f.name)
+        uploadBytes(imgRef, f).then(async (snapshot) => {
+          getDownloadURL(snapshot.ref).then((url) => {
+            console.log(url)
+            update[this.name] = url
+            docRef = doc(this.firestore, 'Usuarios', this.usuarioService.UsuarioLogeado)
+            updateDoc(docRef, update).catch((error) => {
+              setDoc(docRef, update)
+            });
+            console.log('se ha actualizado la base')
+          })
         })
       }
     });
 
-    
+
 
   }
 }
