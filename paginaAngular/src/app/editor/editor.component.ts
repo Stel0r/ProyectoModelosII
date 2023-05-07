@@ -59,11 +59,13 @@ export class EditorComponent {
     if(this.usuarioService.existeBoceto(this.name)){
       let img = new Image
       let ctx = this.canvass.getContext('2d')!
+      let source = this.usuarioService.bocetos.get(this.name)?.get('dataURL')!;
+      console.log(source)
       ctx.clearRect(0, 0, this.canvass.width, this.canvass.height)
       img.onload = function () {
         ctx.drawImage(img, 0, 0);
       };
-      img.src = this.usuarioService.bocetos.get(this.name)!;
+      img.src = source
     }else{
       this.context.fillStyle = "white"
       this.context.fillRect(0,0,canvasEl.width,canvasEl.height)
@@ -184,7 +186,7 @@ export class EditorComponent {
   guardarCambios() {
     this.canvass.toBlob( (blob) =>{
       if(blob){
-        this.firebaseService.guardarCambios(blob,this.name,this.usuarioService.UsuarioLogeado)
+        this.firebaseService.guardarCambios(blob,this.name,this.usuarioService.UsuarioLogeado,this.canvasState)
       }
     })
 

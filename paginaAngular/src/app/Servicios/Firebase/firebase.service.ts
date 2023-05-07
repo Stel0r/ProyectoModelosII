@@ -13,7 +13,7 @@ export class FirebaseService {
   constructor(private storage: Storage) { }
 
 
-  guardarCambios(blob: Blob, name: string,user:string) {
+  guardarCambios(blob: Blob, name: string,user:string,dataUrl:string) {
     let f: File;
     let url: string
     let docRef: DocumentReference
@@ -25,8 +25,9 @@ export class FirebaseService {
     let imgRef: StorageReference = ref(this.storage, 'Users/' + user + '/' + f.name)
     uploadBytes(imgRef, f).then(async (snapshot) => {
       getDownloadURL(snapshot.ref).then((url) => {
-        console.log(url)
-        update[name] = url
+        update[name] = {}
+        update[name]["img"] = url
+        update[name]["dataURL"] = dataUrl
         docRef = doc(this.firestore, 'Usuarios', user)
         updateDoc(docRef, update).catch((error) => {
           setDoc(docRef, update)
@@ -41,10 +42,13 @@ export class FirebaseService {
 
   async recuperarBocetos(user:string){
     let data = await getDoc(doc(this.firestore,'Usuarios',user),)
-    let map = new Map<string,string>()
+    let map = new Map<string,Map<string,string>>()
     if(data.exists()){
       for (let key in data.data()){
-        map.set(key,(data.data())[key])
+        map.set(key,new Map<string,string>())
+        let innerMap = map.get(key)!
+        innerMap.set('img',(data.data())[key]['img'])
+        innerMap.set('dataURL',(data.data())[key]['dataURL'])
       }
     }
     return map

@@ -12,7 +12,7 @@ import { Observable, of } from 'rxjs';
 export class InicioComponent {
 
   activeItem:number = 0;
-  bocetos:Map<string,string>
+  bocetos:Map<string,Map<string,string>>
   noSelection : boolean = true;
   nuevoError:string;
   nuevoErrorB:boolean = false
@@ -41,7 +41,7 @@ export class InicioComponent {
     let active = document.querySelector('.bocetos > button:nth-of-type('+this.activeItem+')')?.classList.remove('active')
     let n = document.querySelector('.bocetos > button:nth-of-type('+i+')')!
     n.classList.add('active')
-    document.getElementById('preview')?.setAttribute('src',this.bocetos.get(n.innerHTML)!)
+    document.getElementById('preview')?.setAttribute('src',this.bocetos.get(n.innerHTML)?.get('img')!)
     this.noSelection = false;
     this.activeItem = i
   }

@@ -19,7 +19,7 @@ export class LoginComponentComponent {
   hayError:boolean = false;
   mensajeError:string;
   responseCode:number;
-  bocetos:Map<string,string>;
+  bocetos:Map<string,Map<string,string>>;
 
   constructor(private http : HttpClient,private  fb:FormBuilder, private router:Router, private usarioServicio:UsuarioService){
 

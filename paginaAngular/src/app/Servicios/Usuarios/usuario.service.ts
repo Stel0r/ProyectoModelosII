@@ -7,7 +7,7 @@ import { DocumentData } from '@angular/fire/firestore';
 })
 export class UsuarioService {
   UsuarioLogeado:string = ""
-  bocetos:Map<string,string>
+  bocetos:Map<string,Map<string,string>>
   constructor(private firebase:FirebaseService) { }
 
   hayUsuarioLogeado(){
@@ -25,10 +25,6 @@ export class UsuarioService {
 
   existeBoceto(nombre:string){
     return this.bocetos.has(nombre)
-  }
-
-  actualizarBocetos(name:string,url:string){
-      this.bocetos.set(name,url)
   }
 
   async obtenerBocetos(){
