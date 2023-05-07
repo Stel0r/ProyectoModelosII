@@ -16,7 +16,7 @@ const routes: Routes = [
     path:'inicio', component:InicioComponent
   },
   {
-    path:'editor', component:EditorComponent
+    path:'editor/:name', component:EditorComponent
   }
 ];
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { DocumentReference, Firestore, doc, getFirestore, setDoc, updateDoc } from '@angular/fire/firestore';
+import { DocumentReference, Firestore, doc, getDoc, getFirestore, setDoc, updateDoc } from '@angular/fire/firestore';
 import { Storage, StorageReference, deleteObject, getDownloadURL, ref, uploadBytes } from '@angular/fire/storage';
 import { UsuarioService } from '../Usuarios/usuario.service';
 
@@ -8,37 +8,47 @@ import { UsuarioService } from '../Usuarios/usuario.service';
 })
 export class FirebaseService {
 
-  firestore: Firestore
+  firestore: Firestore = getFirestore()
 
-  constructor(private storage: Storage, private usuarioService: UsuarioService) { }
+  constructor(private storage: Storage) { }
 
-  ngAfterInit() {
-    this.firestore = getFirestore()
-  }
 
-  guardarCambios(blob: Blob, name: string) {
+  guardarCambios(blob: Blob, name: string,user:string) {
     let f: File;
     let url: string
     let docRef: DocumentReference
     let update: any = {}
-    deleteObject(ref(this.storage, 'Users/' + this.usuarioService.UsuarioLogeado + '/' + name + ".jpeg")).catch((error) => {
+    deleteObject(ref(this.storage, 'Users/' + user + '/' + name + ".jpeg")).catch((error) => {
       console.log("creando nuevo Registro de Boceto")
     })
     f = new File([blob], name + ".jpeg", { type: 'image/jpeg' })
-    let imgRef: StorageReference = ref(this.storage, 'Users/' + this.usuarioService.UsuarioLogeado + '/' + f.name)
+    let imgRef: StorageReference = ref(this.storage, 'Users/' + user + '/' + f.name)
     uploadBytes(imgRef, f).then(async (snapshot) => {
       getDownloadURL(snapshot.ref).then((url) => {
         console.log(url)
         update[name] = url
-        docRef = doc(this.firestore, 'Usuarios', this.usuarioService.UsuarioLogeado)
+        docRef = doc(this.firestore, 'Usuarios', user)
         updateDoc(docRef, update).catch((error) => {
           setDoc(docRef, update)
+        }).finally(()=>{
+          console.log('se ha actualizado la base')
         });
-        console.log('se ha actualizado la base')
+        
       })
     })
   }
 
+
+  async recuperarBocetos(user:string){
+    let data = await getDoc(doc(this.firestore,'Usuarios',user),)
+    let map = new Map<string,string>()
+    if(data.exists()){
+      for (let key in data.data()){
+        map.set(key,(data.data())[key])
+      }
+    }
+    return map
+  }
 
 
 };

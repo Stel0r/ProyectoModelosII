@@ -5,6 +5,7 @@ import { Storage, StorageReference, deleteObject, getDownloadURL, ref, uploadByt
 import { doc, updateDoc, getFirestore, Firestore, DocumentReference, addDoc, setDoc } from '@angular/fire/firestore';
 import { UsuarioService } from '../Servicios/Usuarios/usuario.service';
 import { FirebaseService } from '../Servicios/Firebase/firebase.service';
+import { ActivatedRoute, Router } from '@angular/router';
 
 
 @Component({
@@ -28,13 +29,22 @@ export class EditorComponent {
   lineWPincel: number = 5;
   lineWEraser: number = 10;
   lineColor: string = '#000000'
-  name: string = 'boceto2'
+  name: string
   firestore: Firestore
+  cargando:boolean = true;
 
-  constructor(private storage: Storage, private usuarioService: UsuarioService,private firebaseService:FirebaseService) {
-
+  constructor(private storage: Storage, private usuarioService: UsuarioService,private firebaseService:FirebaseService,private activatedRoute:ActivatedRoute,private router:Router) {
   }
 
+  ngOnInit(){
+    if(!this.usuarioService.hayUsuarioLogeado()){
+      this.router.navigate(['/'])
+    }
+    this.activatedRoute.params.subscribe((params)=>{
+      this.name = params['name']
+    })
+
+  }
   ngAfterViewInit() {
     this.firestore = getFirestore();
     const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
@@ -46,13 +56,26 @@ export class EditorComponent {
     canvasEl.width = 1920;
     canvasEl.height = 1080;
 
-    this.context.fillStyle = "white"
-    this.context.fillRect(0,0,canvasEl.width,canvasEl.height)
-
+    if(this.usuarioService.existeBoceto(this.name)){
+      let img = new Image
+      let ctx = this.canvass.getContext('2d')!
+      ctx.clearRect(0, 0, this.canvass.width, this.canvass.height)
+      img.onload = function () {
+        ctx.drawImage(img, 0, 0);
+      };
+      img.src = this.usuarioService.bocetos.get(this.name)!;
+    }else{
+      this.context.fillStyle = "white"
+      this.context.fillRect(0,0,canvasEl.width,canvasEl.height)
+    }
     this.context.lineWidth = this.lineWPincel;
     this.context.lineJoin = 'round';
     this.context.lineCap = 'round';
     this.context.strokeStyle = this.lineColor;
+
+    
+
+    
 
     canvasEl.addEventListener('mousedown', (e: MouseEvent) => {
       this.drawing = true;
@@ -80,6 +103,8 @@ export class EditorComponent {
     canvasEl.addEventListener('mouseleave', () => {
       this.drawing = false;
     });
+
+    this.cargando = false
   }
 
 
@@ -157,11 +182,12 @@ export class EditorComponent {
   }
 
   guardarCambios() {
-    this.canvass.toBlob((blob) =>{
+    this.canvass.toBlob( (blob) =>{
       if(blob){
-        this.firebaseService.guardarCambios(blob,this.name)
+        this.firebaseService.guardarCambios(blob,this.name,this.usuarioService.UsuarioLogeado)
       }
     })
 
   }
+
 }

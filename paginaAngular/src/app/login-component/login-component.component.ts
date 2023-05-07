@@ -19,6 +19,7 @@ export class LoginComponentComponent {
   hayError:boolean = false;
   mensajeError:string;
   responseCode:number;
+  bocetos:Map<string,string>;
 
   constructor(private http : HttpClient,private  fb:FormBuilder, private router:Router, private usarioServicio:UsuarioService){
 
@@ -26,6 +27,7 @@ export class LoginComponentComponent {
 
   ngOnInit(){
     this.crearFormulario();
+    this.bocetos = this.usarioServicio.bocetos
   }
   async revisarLogIn(){
     this.hayError = false;
@@ -36,14 +38,16 @@ export class LoginComponentComponent {
       })
   }
 
-  completarLogIn(code:number,message:string){
+  async completarLogIn(code:number,message:string){
     this.responseCode = code
     this.mensajeError = message
     if(this.responseCode ==404){
       this.hayError = true
     }else{
-      this.usarioServicio.UsuarioLogeado = this.formulario.controls['correo'].value
-      this.router.navigate(['/inicio'])
+      this.usarioServicio.LogearUsuario(this.formulario.controls['correo'].value).then((value:any)=>{
+        this.router.navigate(['/inicio'])
+      })
+      
     }
   }
 
