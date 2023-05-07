@@ -54,6 +54,10 @@ export class FirebaseService {
     return map
   }
 
+  eliminarBoceto(){
+    
+  }
+
 
 };
 
