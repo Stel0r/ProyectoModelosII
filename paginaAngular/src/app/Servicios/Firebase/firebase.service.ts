@@ -14,7 +14,7 @@ export class FirebaseService {
   constructor(private storage: Storage) { }
 
 
-  guardarCambios(blob: Blob, name: string,user:string,dataUrl:string) {
+  async guardarCambios(blob: Blob, name: string,user:string,dataUrl:string){
     let f: File;
     let url: string
     let docRef: DocumentReference
@@ -24,18 +24,18 @@ export class FirebaseService {
     })
     f = new File([blob], name + ".jpeg", { type: 'image/jpeg' })
     let imgRef: StorageReference = ref(this.storage, 'Users/' + user + '/' + f.name)
-    uploadBytes(imgRef, f).then(async (snapshot) => {
-      getDownloadURL(snapshot.ref).then((url) => {
+    return await uploadBytes(imgRef, f).then(async (snapshot) => {
+      return await getDownloadURL(snapshot.ref).then(async(url) => {
         update[name] = {}
         update[name]["img"] = url
         update[name]["dataURL"] = dataUrl
         docRef = doc(this.firestore, 'Usuarios', user)
-        updateDoc(docRef, update).catch((error) => {
-          setDoc(docRef, update)
-        }).finally(()=>{
+        return await updateDoc(docRef, update).catch(async (error) => {
+          return await setDoc(docRef, update).then(()=>{return "exito"})
+        }).then(async ()=>{
           console.log('se ha actualizado la base')
-        });
-        
+          return "exito"
+        })
       })
     })
   }

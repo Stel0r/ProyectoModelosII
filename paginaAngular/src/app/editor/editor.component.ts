@@ -2,7 +2,7 @@ import { ThisReceiver } from '@angular/compiler';
 import { Component, Input, ViewChild, ElementRef, HostListener, Directive } from '@angular/core';
 import { MonoTypeOperatorFunction, fromEvent } from 'rxjs';
 import { Storage, StorageReference, deleteObject, getDownloadURL, ref, uploadBytes } from '@angular/fire/storage';
-import { doc, updateDoc, getFirestore, Firestore, DocumentReference, addDoc, setDoc } from '@angular/fire/firestore';
+import { doc, updateDoc, getFirestore, Firestore, DocumentReference, addDoc, setDoc, or } from '@angular/fire/firestore';
 import { UsuarioService } from '../Servicios/Usuarios/usuario.service';
 import { FirebaseService } from '../Servicios/Firebase/firebase.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -22,7 +22,7 @@ export class EditorComponent {
   lastY: number
   canvass: HTMLCanvasElement
   canvasBackup: Array<string> = new Array<string>
-  canvasState: string = ''
+  canvasState: string = ""
 
   //variables del editor
   tool: string = "pencil"
@@ -35,6 +35,7 @@ export class EditorComponent {
 
   constructor(private storage: Storage, private usuarioService: UsuarioService,private firebaseService:FirebaseService,private activatedRoute:ActivatedRoute,private router:Router) {
   }
+
 
   ngOnInit(){
     if(!this.usuarioService.hayUsuarioLogeado()){
@@ -49,18 +50,16 @@ export class EditorComponent {
     this.firestore = getFirestore();
     const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
     this.canvass = canvasEl;
-    console.log(this.canvas)
     this.context = canvasEl.getContext('2d')!;
-    this.canvasState = canvasEl.toDataURL();
 
     canvasEl.width = 1920;
     canvasEl.height = 1080;
 
     if(this.usuarioService.existeBoceto(this.name)){
       let img = new Image
-      let ctx = this.canvass.getContext('2d')!
+      let can = this.canvass
+      let ctx = can.getContext('2d')!
       let source = this.usuarioService.bocetos.get(this.name)?.get('dataURL')!;
-      console.log(source)
       ctx.clearRect(0, 0, this.canvass.width, this.canvass.height)
       img.onload = function () {
         ctx.drawImage(img, 0, 0);
@@ -70,6 +69,7 @@ export class EditorComponent {
       this.context.fillStyle = "white"
       this.context.fillRect(0,0,canvasEl.width,canvasEl.height)
     }
+
     this.context.lineWidth = this.lineWPincel;
     this.context.lineJoin = 'round';
     this.context.lineCap = 'round';
@@ -81,6 +81,10 @@ export class EditorComponent {
 
     canvasEl.addEventListener('mousedown', (e: MouseEvent) => {
       this.drawing = true;
+      if(this.canvasState === ""){
+        console.log("primer contacto")
+        this.canvasState = this.canvass.toDataURL()
+      }
       this.lastX = e.clientX - canvasEl.offsetLeft;
       this.lastY = e.clientY - canvasEl.offsetTop;
       this.draw(this.translatedX(this.lastX), this.translatedY(this.lastY), this.translatedX(e.clientX - canvasEl.offsetLeft), this.translatedY(e.clientY - canvasEl.offsetTop));
@@ -106,7 +110,7 @@ export class EditorComponent {
       this.drawing = false;
     });
 
-    this.cargando = false
+    setTimeout(()=>{this.cargando = false},2000)
   }
 
 
@@ -184,12 +188,15 @@ export class EditorComponent {
   }
 
   guardarCambios() {
-    this.canvass.toBlob( (blob) =>{
+    this.cargando = true;
+    setTimeout(()=> {
+      this.cargando = false
+    },4000)
+    this.canvass.toBlob((blob) =>{
       if(blob){
         this.firebaseService.guardarCambios(blob,this.name,this.usuarioService.UsuarioLogeado,this.canvasState)
       }
     })
-
+    
   }
-
 }
