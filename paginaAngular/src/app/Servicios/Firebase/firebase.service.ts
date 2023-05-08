@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { DocumentReference, Firestore, doc, getDoc, getFirestore, setDoc, updateDoc } from '@angular/fire/firestore';
+import { DocumentReference, FieldValue, Firestore, deleteField, doc, getDoc, getFirestore, setDoc, updateDoc } from '@angular/fire/firestore';
 import { Storage, StorageReference, deleteObject, getDownloadURL, ref, uploadBytes } from '@angular/fire/storage';
 import { UsuarioService } from '../Usuarios/usuario.service';
+import { retry } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -54,8 +55,25 @@ export class FirebaseService {
     return map
   }
 
-  eliminarBoceto(){
-    
+  async eliminarBoceto(name:string,user:string){
+    console.log(name)
+    console.log(user)
+    let imgref: StorageReference =  ref(this.storage, 'Users/' + user + '/' + name + ".jpeg")
+    return await deleteObject(imgref).then(async()=>{
+      let docRef = doc(this.firestore,'Usuarios',user)
+      let update:any = {}
+      update[name] = deleteField()
+      return await updateDoc(docRef,update).then((response)=>{
+        return 1
+      }).catch((error)=>{
+        console.log(error)
+        return 0
+      })
+    })
+    .catch((error) => {
+      console.log(error)
+      return 0
+    })
   }
 
 

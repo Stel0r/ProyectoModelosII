@@ -1,7 +1,7 @@
 <div class="pantalla-carga" *ngIf ="this.cargando">.</div>
 <div class="fondo"><p></p></div>
 <div class = "botones-superiores bg-dark">
-    <a class = 'boton-superior' [href] = "this.canvasState" download>Descargar</a>
+    <a class = 'boton-superior' [href] = "this.canvasState" [download]="this.name">Descargar</a>
     <a class = 'boton-superior' (click) = "guardarCambios()">Guardar</a>
     <a class = 'boton-superior'>Invitar</a>
 </div>

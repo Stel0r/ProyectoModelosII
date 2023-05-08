@@ -12,7 +12,7 @@
     </div>
     <div class = "bottom-buttons">
         <button [disabled] = "this.noSelection" class="btn btn-primary" (click) = "abrirBoceto()">Abrir Boceto</button>
-        <button class="btn btn-primary">Eliminar Boceto</button>
+        <button [disabled] = "this.noSelection" class="btn btn-primary" (click) = "eliminarBoceto()">Eliminar Boceto</button>
     </div>
     <div class = "bottom-buttons boceto-nuevo form-group">
         <button class="btn btn-primary" (click)="crearBoceto()">Nuevo Boceto</button>
