@@ -26,6 +26,9 @@ export class LoginComponentComponent {
   }
 
   ngOnInit(){
+    if(this.usarioServicio.hayUsuarioLogeado()){
+      this.router.navigate(['/inicio'])
+    }
     this.crearFormulario();
     this.bocetos = this.usarioServicio.bocetos
   }
