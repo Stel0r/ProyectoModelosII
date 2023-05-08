@@ -32,7 +32,7 @@ export class LoginComponentComponent {
     this.crearFormulario();
     this.bocetos = this.usarioServicio.bocetos
   }
-  async revisarLogIn(){
+  revisarLogIn(){
     this.hayError = false;
     this.http.post<LogResponse>("http://127.0.0.1:8000/validate",this.formulario.value).subscribe(
       {

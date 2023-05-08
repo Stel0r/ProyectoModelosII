@@ -2,9 +2,15 @@
     padding-left: 40%;
     padding-right: 40%;
     margin: auto;
-    margin-top: 100px;
+    margin-top: 50px;
 }
 
 .submit-button{
     margin: 10px;
+}
+
+.error{
+    margin-left: 25%;
+    margin-right: 25%;
+    margin-top: 50px
 }

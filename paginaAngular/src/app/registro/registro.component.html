@@ -1,4 +1,6 @@
-<div class = "form">
+<div *ngIf="this.error" class="alert alert-danger error" role="alert" >{{this.mensaje}}</div>
+<div *ngIf="this.exito" class="alert alert-success error" role="alert" >{{this.mensaje}}</div>
+<div class = "form">  
     <form action="" [formGroup] = "formulario">
       <label for="" class="form-label">Correo</label>
       <input type="text" class="form-control" id="" formControlName = "correo">
@@ -7,11 +9,11 @@
       <label for="" class="form-label">Nombre</label>
       <input type="text" class="form-control" id="" formControlName = "nombre">
       <label for="" class="form-label">Apellido</label>
-      <input type="password" class="form-control" id="" formControlName = "apellido">
+      <input type="text" class="form-control" id="" formControlName = "apellido">
       <label for="" class="form-label">Documento</label>
       <input type="text" class="form-control" id=""  formControlName = "documento">
       <label for="" class="form-label">Direccion</label>
       <input type="text" class="form-control" id="" formControlName = "direccion">
-      <Button class="btn btn-primary submit-button">Aceptar</Button>
+      <Button  [disabled] = "!formulario.valid" class="btn btn-primary submit-button" (click)="enviarRegistro()">Aceptar</Button>
     </form>
   </div>

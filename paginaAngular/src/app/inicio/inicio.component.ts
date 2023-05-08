@@ -60,7 +60,11 @@ export class InicioComponent {
     }else if(this.usuarioServicio.existeBoceto(value)){
       this.nuevoErrorB = true;
       this.nuevoError = 'Este nombre ya lo usaste, escoge otro'
-    }else{
+    }else if(value.length > 20){
+      this.nuevoErrorB = true;
+      this.nuevoError = 'El nombre tiene un maximo de 20 caracteres'
+    }
+    else{
       this.router.navigate(['/editor',value])
     }
   }

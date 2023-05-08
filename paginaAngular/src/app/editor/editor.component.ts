@@ -189,14 +189,17 @@ export class EditorComponent {
 
   guardarCambios() {
     this.cargando = true;
-    setTimeout(()=> {
+    new Promise((resolve,reject)=>{
+      this.canvass.toBlob(async (blob) =>{
+        if(blob){
+          await this.firebaseService.guardarCambios(blob,this.name,this.usuarioService.UsuarioLogeado,this.canvasState)
+          resolve(true)
+        }
+      })
+    }).then((result)=>[
       this.cargando = false
-    },4000)
-    this.canvass.toBlob((blob) =>{
-      if(blob){
-        this.firebaseService.guardarCambios(blob,this.name,this.usuarioService.UsuarioLogeado,this.canvasState)
-      }
-    })
+    ])
+    
     
   }
 }

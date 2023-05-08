@@ -6,19 +6,19 @@
         <div class="list-group bocetos">
             <button  *ngFor = "let boceto of this.bocetos.keys();index as i"  type="button" class="list-group-item list-group-item-action" (click) = "changeItem(i+1)">{{boceto}}</button>
         </div>
-        <div>
-            <img id="preview" class ="preview" src="https://img.wattpad.com/804c8738be736f9967303107b2e70ae6938dfd18/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f776174747061642d6d656469612d736572766963652f53746f7279496d6167652f4b336e744647353044724b4c56513d3d2d3133352e313537316565386535366237353137303839363736353935303134322e6a7067?s=fit&w=720&h=720" alt="">
+        <div class="preview-container">
+            <img id="preview" class ="preview" src="assets/img/placeholder.jpg" alt="">
         </div>
     </div>
     <div class = "bottom-buttons">
         <button [disabled] = "this.noSelection" class="btn btn-primary" (click) = "abrirBoceto()">Abrir Boceto</button>
         <button [disabled] = "this.noSelection" class="btn btn-primary" (click) = "eliminarBoceto()">Eliminar Boceto</button>
     </div>
+    <div *ngIf="this.nuevoErrorB" class="alert alert-danger error" role="alert" >
+        {{this.nuevoError}}
+    </div>
     <div class = "bottom-buttons boceto-nuevo form-group">
         <button class="btn btn-primary" (click)="crearBoceto()">Nuevo Boceto</button>
         <input class = 'form-control' type="text" name="" id="nombreNuevoBoceto">
-    </div>
-    <div *ngIf="this.nuevoErrorB" class="alert alert-danger error" role="alert" >
-        {{this.nuevoError}}
     </div>
 </div>

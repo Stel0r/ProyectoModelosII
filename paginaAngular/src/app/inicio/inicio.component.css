@@ -5,19 +5,22 @@
 .inicioBody{
     margin-left: 15%;
     margin-right: 15%;
-    margin-top: 100px;
+    margin-top: 25px;
 }
 
 .bocetos{
-    width: 30%;
+    width: auto;
+    min-width: 350px ;
+    padding-right: 50px;
     overflow: hidden;
 }
 
 .bocetos-ventana{
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
+    margin:auto;
     margin-top: 50px;
-    margin-bottom: 50px;
+    margin-bottom: 10px;
 }
 
 .bottom-buttons{
@@ -30,12 +33,15 @@
 }
 
 .preview{
-    margin-left: 50px;
     max-width: 720px;
-    height: auto;
-    aspect-ratio: 16/9;
+    max-height:405px;
+    width: auto;
     border-radius: 5%;
     border: 1px black solid;
+}
+.preview-container{
+    display: flex;
+    justify-content: center;
 }
 
 .boceto-nuevo{
