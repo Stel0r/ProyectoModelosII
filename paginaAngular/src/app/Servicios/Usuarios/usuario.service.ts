@@ -40,7 +40,12 @@ export class UsuarioService {
       console.log(response)
       return response
     })
-
   }
+
+  desloguear(){
+    this.UsuarioLogeado = ""
+    this.bocetos = new Map<string, Map<string, string>>()
+  }
+
 
 }

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { UsuarioService } from '../Servicios/Usuarios/usuario.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -8,7 +9,16 @@ import { UsuarioService } from '../Servicios/Usuarios/usuario.service';
 })
 export class HeaderComponent {
 
-  constructor(public usuarioService:UsuarioService){
+  constructor(public usuarioService:UsuarioService,private router:Router){
+  }
+
+  hayUser(){
+    return this.usuarioService.hayUsuarioLogeado()
   }
   
+
+  desloguear(){
+    this.usuarioService.desloguear()
+    this.router.navigate(["/"])
+  }
 }
