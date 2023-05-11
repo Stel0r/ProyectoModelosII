@@ -9,6 +9,7 @@ var server = http.createServer(app);
 //initialize the WebSocket server instance
 var wss = new WebSocket.Server({ server: server });
 wss.on('connection', function (ws) {
+    console.log("connection created");
     //connection is up, let's add a simple simple event
     ws.on('message', function (message) {
         //log the received message and send it back to the client

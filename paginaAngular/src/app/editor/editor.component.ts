@@ -8,6 +8,7 @@ import { FirebaseService } from '../Servicios/Firebase/firebase.service';
 import { ActivatedRoute, Router } from '@angular/router';
 
 
+
 @Component({
   selector: 'app-editor',
   templateUrl: './editor.component.html',
@@ -23,6 +24,13 @@ export class EditorComponent {
   canvass: HTMLCanvasElement
   canvasBackup: Array<string> = new Array<string>
   canvasState: string = ""
+
+  //variables de conexion al servidor
+  //donde [x,y,timestamp]
+  lastStrokes: Array<[number,number,number]>
+  ws:WebSocket
+  
+
 
   //variables del editor
   tool: string = "pencil"
@@ -199,7 +207,13 @@ export class EditorComponent {
     }).then((result)=>[
       this.cargando = false
     ])
-    
-    
   }
+
+  abrirSala(){
+    this.ws = new WebSocket("ws://localhost:8999")
+    this.ws.onopen = (ev:Event)=>{
+      console.log("conexion abierta")
+    }
+  }
+
 }
