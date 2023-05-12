@@ -3,7 +3,7 @@
 <div class = "botones-superiores bg-dark">
     <a class = 'boton-superior' [href] = "this.canvasState" [download]="this.name">Descargar</a>
     <a class = 'boton-superior' (click) = "guardarCambios()">Guardar</a>
-    <a class = 'boton-superior' (click) = "abrirSala()">Invitar</a>
+    <a *ngIf = "!this.haySala" class = 'boton-superior' (click) = "abrirSala()">Invitar</a>
 </div>
 <div class="barra-lateral">
     <div class="panel-izq">

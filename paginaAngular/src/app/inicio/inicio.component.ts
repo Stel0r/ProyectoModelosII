@@ -39,7 +39,7 @@ export class InicioComponent {
 
 
   changeItem(i:number){
-    let active = document.querySelector('.bocetos > button:nth-of-type('+this.activeItem+')')?.classList.remove('active')
+    document.querySelector('.bocetos > button:nth-of-type('+this.activeItem+')')?.classList.remove('active')
     let n = document.querySelector('.bocetos > button:nth-of-type('+i+')')!
     n.classList.add('active')
     document.getElementById('preview')?.setAttribute('src',this.bocetos.get(n.innerHTML)?.get('img')!)
@@ -86,6 +86,10 @@ export class InicioComponent {
         this.cargando = false
       }
     })
+    
+  }
+
+  conectarSala(){
     
   }
 }

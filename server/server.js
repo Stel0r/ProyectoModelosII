@@ -8,15 +8,34 @@ var app = express();
 var server = http.createServer(app);
 //initialize the WebSocket server instance
 var wss = new WebSocket.Server({ server: server });
+var Sala = /** @class */ (function () {
+    function Sala() {
+        this.integrantes = [];
+        this.updateList = [];
+    }
+    return Sala;
+}());
+var listaSalas = new Array();
 wss.on('connection', function (ws) {
     console.log("connection created");
     //connection is up, let's add a simple simple event
     ws.on('message', function (message) {
-        //log the received message and send it back to the client
-        console.log('received: %s', message);
-        //log the received message and send it back to the client
-        console.log(JSON.parse(message)["loca"]);
-        ws.send("Hello, you sent -> ".concat(message));
+        var response = JSON.parse(message.toString());
+        //al abrir una sala
+        if (response["action"] == "open") {
+            var sala = new Sala();
+            sala.id = listaSalas.length;
+            sala.owner = response["user"];
+            sala.canvas = response["canvasUrl"];
+            sala.integrantes.push(sala.owner);
+            listaSalas.push(sala);
+            var message_1 = {
+                "action": "open",
+                "res": "success",
+                "code": sala.id
+            };
+            ws.send(JSON.stringify(message_1));
+        }
     });
     //send immediatly a feedback to the incoming connection    
     ws.send('Hi there, I am a WebSocket server');

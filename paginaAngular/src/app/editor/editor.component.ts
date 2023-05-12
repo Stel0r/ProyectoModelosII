@@ -27,8 +27,11 @@ export class EditorComponent {
 
   //variables de conexion al servidor
   //donde [x,y,timestamp]
-  lastStrokes: Array<[number,number,number]>
+  lastStrokes: Array<[number,number,number]> = []
   ws:WebSocket
+  idSala:number
+  haySala:boolean = false;
+  integrantes:Array<string> = []
   
 
 
@@ -211,9 +214,35 @@ export class EditorComponent {
 
   abrirSala(){
     this.ws = new WebSocket("ws://localhost:8999")
-    this.ws.onopen = (ev:Event)=>{
-      console.log("conexion abierta")
+    this.ws.onopen = () => {
+      let openRequest : any = {
+        "action": "open",
+        "user" : "diego.felipe.gamez@gmail.com",
+        "canvasUrl" : this.canvass.toDataURL()
+        }
+      this.cargando = true;
+      this.ws.send(JSON.stringify(<JSON>openRequest))
+    }
+    this.ws.onmessage = (event:MessageEvent) => {
+      let response = JSON.parse(event.data)
+      //abrir sala
+      console.log(response["res"])
+      if(response["action"] == "open"){
+        console.log("detecto action open")
+        if (response["res"] == "success"){
+          console.log("abriendo sala")
+          this.idSala = response["code"]
+          this.haySala = true;
+          this.cargando = false;
+          this.integrantes.push(this.usuarioService.UsuarioLogeado)
+          console.log("se ha iniciado la sesion usando el id " +this.idSala)
+          this.empezarSala()
+        }
+      }
     }
   }
 
+  empezarSala(){
+
+  }
 }

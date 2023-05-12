@@ -10,18 +10,40 @@ const server = http.createServer(app);
 //initialize the WebSocket server instance
 const wss = new WebSocket.Server({ server });
 
+class Sala{
+    id:number
+    owner:string
+    canvas:string
+    lastUpdate:number
+    integrantes: Array<string> = []
+    updateList:Array<[number,number,number]> = []
+}
+
+let listaSalas : Array<Sala> = new Array<Sala>()
+
 wss.on('connection', (ws: WebSocket) => {
 
     console.log("connection created")
 
     //connection is up, let's add a simple simple event
-    ws.on('message', (message:string) => {
-
-        //log the received message and send it back to the client
-        console.log('received: %s', message);
-        //log the received message and send it back to the client
-        console.log(JSON.parse(message)["loca"])
-        ws.send(`Hello, you sent -> ${message}`);
+    ws.on('message', (message) => {
+        let response = JSON.parse(message.toString())
+        //al abrir una sala
+        if(response["action"] == "open"){
+            let sala = new Sala()
+            sala.id = listaSalas.length
+            sala.owner = response["user"]
+            sala.canvas = response["canvasUrl"]
+            sala.integrantes.push(sala.owner)
+            listaSalas.push(sala)
+            let message : any = {
+                "action":"open",
+                "res": "success",
+                "code": sala.id
+                
+            }
+            ws.send(JSON.stringify(message))
+        }
     });
 
     //send immediatly a feedback to the incoming connection    
