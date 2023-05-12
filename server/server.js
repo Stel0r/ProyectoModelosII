@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
 var http = require("http");
 var WebSocket = require("ws");
+var _a = require('canvas'), createCanvas = _a.createCanvas, loadImage = _a.loadImage, Image = _a.Image, context = _a.context;
 var app = express();
 //initialize a simple http server
 var server = http.createServer(app);
@@ -18,7 +19,6 @@ var User = /** @class */ (function () {
 var Sala = /** @class */ (function () {
     function Sala() {
         this.integrantes = new Map();
-        this.updateList = [];
     }
     return Sala;
 }());
@@ -34,7 +34,16 @@ wss.on('connection', function (ws) {
             var sala = new Sala();
             sala.id = listaSalas.length;
             sala.owner = [response["user"], ws];
-            sala.canvas = response["canvasUrl"];
+            sala.canvasUrl = response["canvasUrl"];
+            sala.canvas = createCanvas(1920, 1080);
+            var img_1 = new Image;
+            var ctx_1 = sala.canvas.getContext('2d');
+            var source = sala.canvasUrl;
+            ctx_1.clearRect(0, 0, sala.canvas.width, sala.canvas.height);
+            img_1.onload = function () {
+                ctx_1.drawImage(img_1, 0, 0);
+            };
+            img_1.src = source;
             sala.integrantes.set(response["user"], ws);
             listaSalas.push(sala);
             var message_1 = {
@@ -65,9 +74,24 @@ wss.on('connection', function (ws) {
             var msg = {
                 "action": "connect",
                 "res": "success",
-                "canvasUrl": listaSalas[response["idsala"]].canvas
+                "canvasUrl": listaSalas[response["idsala"]].canvas.toDataURL()
             };
             ws.send(JSON.stringify(msg));
+            //al enviar un trazo
+        }
+        else if (response["action"] == "stroke") {
+            //envia la info a todos los conectados a la sala
+            listaSalas[response["idsala"]].integrantes.forEach(function (socket, key) {
+                if (socket != ws) {
+                    var res = {
+                        "action": "stroke",
+                        "user": response["user"],
+                        "data": response["data"]
+                    };
+                    drawUpdate(response["data"], listaSalas[response["idsala"]].canvas.getContext('2d'));
+                    socket.send(JSON.stringify(res));
+                }
+            });
         }
     });
 });
@@ -83,4 +107,15 @@ function encontrarSala(id) {
         }
     }
     return false;
+}
+function drawUpdate(update, context) {
+    for (var _i = 0, update_1 = update; _i < update_1.length; _i++) {
+        var list = update_1[_i];
+        context.beginPath();
+        context.moveTo(list[0], list[1]);
+        context.lineTo(list[2], list[3]);
+        context.strokeStyle = list[4];
+        context.lineWidth = list[5];
+        context.stroke();
+    }
 }

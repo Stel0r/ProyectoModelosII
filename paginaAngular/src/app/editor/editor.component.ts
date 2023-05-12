@@ -27,7 +27,7 @@ export class EditorComponent {
 
   //variables de conexion al servidor
   //donde [x1,y2,x2,y2]
-  lastStrokes: Array<[number, number,number,number]> = []
+  lastStrokes: Array<[number, number,number,number,string,number]> = []
   ws: WebSocket
   idSala: number
   haySala: boolean = false;
@@ -44,6 +44,7 @@ export class EditorComponent {
   name: string
   firestore: Firestore
   cargando: boolean = true;
+  puedeGuardar:boolean = true;
 
   constructor(private storage: Storage, private usuarioService: UsuarioService, private firebaseService: FirebaseService, private activatedRoute: ActivatedRoute, private router: Router) {
   }
@@ -56,10 +57,12 @@ export class EditorComponent {
     this.activatedRoute.params.subscribe((params) => {
       if (params['name']) {
         this.name = params['name']
+        this.puedeGuardar = true
       } else if (params['id']) {
         this.haySala = true;
         this.esOwner = false;
         this.idSala = params["id"]
+        this.puedeGuardar = false
       }
     })
 
@@ -99,7 +102,8 @@ export class EditorComponent {
       }
       this.ws.onmessage = (event) => {
         let response = JSON.parse(event.data)
-
+        console.log(response["action"])
+        //solicitar conexion a sala
         if (response["action"] == "connect") {
           if (response["res"] == "success") {
             this.canvasCompartido = response["canvasUrl"]
@@ -114,6 +118,10 @@ export class EditorComponent {
             console.log(this.canvasCompartido)
             img.src = this.canvasCompartido
           }
+        }else if(response["action"] == "stroke"){
+          console.log("stroke received")
+          console.log(response["data"])
+          this.drawUpdate(response["data"] as Array<[number,number,number,number,string,number]>)
         }
       }
 
@@ -157,9 +165,12 @@ export class EditorComponent {
         let msg:any ={
           "action":"stroke",
           "user":this.usuarioService.UsuarioLogeado,
-          "data": this.lastStrokes
+          "data": this.lastStrokes,
+          "idsala":this.idSala
         } 
         this.ws.send(JSON.stringify(<JSON>msg))
+        this.drawUpdate(this.lastStrokes)
+        this.lastStrokes.splice(0)
       }
     });
 
@@ -190,17 +201,33 @@ export class EditorComponent {
     this.context.beginPath();
     this.context.moveTo(x1, y1);
     this.context.lineTo(x2, y2);
+    if(this.tool == 'pencil'){
+      this.context.lineWidth = this.lineWPincel
+      this.context.strokeStyle = this.lineColor
+    }else if(this.tool == 'eraser'){
+      this.context.lineWidth = this.lineWEraser
+      this.context.strokeStyle = "#ffffff"
+    }
     this.context.stroke();
     if(this.haySala){
-      this.lastStrokes.push([x1,y1,x2,y2])
+      if(this.tool == 'pencil'){
+        this.lastStrokes.push([x1,y1,x2,y2,this.lineColor,this.lineWPincel])
+      }else if(this.tool == 'eraser'){
+        this.lastStrokes.push([x1,y1,x2,y2,"#ffffff",this.lineWEraser])
+      }
+      
     }
   }
 
-  drawUpdate(x1: number, y1: number, x2: number, y2: number) {
-    this.context.beginPath();
-    this.context.moveTo(x1, y1);
-    this.context.lineTo(x2, y2);
-    this.context.stroke();
+  drawUpdate(update: Array<[number,number,number,number,string,number]>) {
+    for (let list of update){
+      this.context.beginPath();
+      this.context.moveTo(list[0], list[1]);
+      this.context.lineTo(list[2], list[3]);
+      this.context.strokeStyle = list[4]
+      this.context.lineWidth = list[5]
+      this.context.stroke();
+    }
   }
 
   cambiarColor() {
@@ -276,7 +303,7 @@ export class EditorComponent {
     this.ws.onopen = () => {
       let openRequest: any = {
         "action": "open",
-        "user": "diego.felipe.gamez@gmail.com",
+        "user": this.usuarioService.UsuarioLogeado,
         "canvasUrl": this.canvass.toDataURL()
       }
       this.cargando = true;
@@ -298,6 +325,10 @@ export class EditorComponent {
           console.log("se ha iniciado la sesion usando el id " + this.idSala)
           this.empezarSala()
         }
+      }else if(response["action"] == "stroke"){
+        console.log("stroke received")
+        console.log(response["data"])
+        this.drawUpdate(response["data"] as Array<[number,number,number,number,string,number]>)
       }
     }
   }

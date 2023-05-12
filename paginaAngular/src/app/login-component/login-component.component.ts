@@ -47,6 +47,7 @@ export class LoginComponentComponent {
     if(this.responseCode ==404){
       this.hayError = true
     }else{
+      console.log(this.formulario.controls['correo'].value)
       this.usarioServicio.LogearUsuario(this.formulario.controls['correo'].value).then((value:any)=>{
         this.router.navigate(['/inicio'])
       })
@@ -58,8 +59,8 @@ export class LoginComponentComponent {
 
   crearFormulario(){
     this.formulario = this.fb.group({
-      correo:['diego.felipe.gamez@gmail.com', Validators.compose([Validators.required,Validators.email])],
-      password:['123',Validators.required]
+      correo:['', Validators.compose([Validators.required,Validators.email])],
+      password:['',Validators.required]
     })
   }
 

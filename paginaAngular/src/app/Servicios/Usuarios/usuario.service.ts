@@ -6,12 +6,12 @@ import { DocumentData } from '@angular/fire/firestore';
   providedIn: 'root'
 })
 export class UsuarioService {
-  UsuarioLogeado: string = ""
+  UsuarioLogeado: string
   bocetos: Map<string, Map<string, string>>
   constructor(private firebase: FirebaseService) { }
 
   hayUsuarioLogeado() {
-    if (this.UsuarioLogeado != "") {
+    if (this.UsuarioLogeado) {
       return true
     }
     return false
