@@ -26,14 +26,14 @@ export class EditorComponent {
   canvasState: string = ""
 
   //variables de conexion al servidor
-  //donde [x,y,timestamp]
-  lastStrokes: Array<[number,number,number]> = []
-  ws:WebSocket
-  idSala:number
-  haySala:boolean = false;
-  integrantes:Array<string> = []
-  esOwner : boolean = false
-  
+  //donde [x1,y2,x2,y2]
+  lastStrokes: Array<[number, number,number,number]> = []
+  ws: WebSocket
+  idSala: number
+  haySala: boolean = false;
+  integrantes: Array<string> = []
+  esOwner: boolean = false
+  canvasCompartido: string
 
 
   //variables del editor
@@ -43,34 +43,23 @@ export class EditorComponent {
   lineColor: string = '#000000'
   name: string
   firestore: Firestore
-  cargando:boolean = true;
+  cargando: boolean = true;
 
-  constructor(private storage: Storage, private usuarioService: UsuarioService,private firebaseService:FirebaseService,private activatedRoute:ActivatedRoute,private router:Router) {
+  constructor(private storage: Storage, private usuarioService: UsuarioService, private firebaseService: FirebaseService, private activatedRoute: ActivatedRoute, private router: Router) {
   }
 
 
-  ngOnInit(){
-    if(!this.usuarioService.hayUsuarioLogeado()){
+  ngOnInit() {
+    if (!this.usuarioService.hayUsuarioLogeado()) {
       this.router.navigate(['/'])
     }
-    this.activatedRoute.params.subscribe((params)=>{
-      if(params['name']){
+    this.activatedRoute.params.subscribe((params) => {
+      if (params['name']) {
         this.name = params['name']
-      }else if (params['id']){
+      } else if (params['id']) {
         this.haySala = true;
         this.esOwner = false;
-        this.ws = new WebSocket("ws://localhost:8999")
-        this.ws.onopen = () => {
-          let message:any = {
-            "action":"connect",
-            "user":this.usuarioService.UsuarioLogeado,
-            "idsala": params["id"] 
-          }
-          this.ws.send(JSON.stringify(<JSON>message))
-        }
-        this.ws.onmessage = () => {
-            
-        }
+        this.idSala = params["id"]
       }
     })
 
@@ -83,20 +72,51 @@ export class EditorComponent {
 
     canvasEl.width = 1920;
     canvasEl.height = 1080;
+    if (!this.haySala) {
+      if (this.usuarioService.existeBoceto(this.name)) {
+        let img = new Image
+        let can = this.canvass
+        let ctx = can.getContext('2d')!
+        let source = this.usuarioService.bocetos.get(this.name)?.get('dataURL')!;
+        ctx.clearRect(0, 0, this.canvass.width, this.canvass.height)
+        img.onload = function () {
+          ctx.drawImage(img, 0, 0);
+        };
+        img.src = source
+      } else {
+        this.context.fillStyle = "white"
+        this.context.fillRect(0, 0, canvasEl.width, canvasEl.height)
+      }
+    } else {
+      this.ws = new WebSocket("ws://localhost:8999")
+      this.ws.onopen = () => {
+        let message: any = {
+          "action": "connect",
+          "user": this.usuarioService.UsuarioLogeado,
+          "idsala": this.idSala
+        }
+        this.ws.send(JSON.stringify(<JSON>message))
+      }
+      this.ws.onmessage = (event) => {
+        let response = JSON.parse(event.data)
 
-    if(this.usuarioService.existeBoceto(this.name)){
-      let img = new Image
-      let can = this.canvass
-      let ctx = can.getContext('2d')!
-      let source = this.usuarioService.bocetos.get(this.name)?.get('dataURL')!;
-      ctx.clearRect(0, 0, this.canvass.width, this.canvass.height)
-      img.onload = function () {
-        ctx.drawImage(img, 0, 0);
-      };
-      img.src = source
-    }else{
-      this.context.fillStyle = "white"
-      this.context.fillRect(0,0,canvasEl.width,canvasEl.height)
+        if (response["action"] == "connect") {
+          if (response["res"] == "success") {
+            this.canvasCompartido = response["canvasUrl"]
+            let img = new Image
+            let can = this.canvass
+            let ctx = can.getContext('2d')!
+            ctx.clearRect(0, 0, this.canvass.width, this.canvass.height)
+            img.onload = function () {
+              console.log("dibujando")
+              ctx.drawImage(img, 0, 0);
+            };
+            console.log(this.canvasCompartido)
+            img.src = this.canvasCompartido
+          }
+        }
+      }
+
     }
 
     this.context.lineWidth = this.lineWPincel;
@@ -104,13 +124,13 @@ export class EditorComponent {
     this.context.lineCap = 'round';
     this.context.strokeStyle = this.lineColor;
 
-    
 
-    
+
+
 
     canvasEl.addEventListener('mousedown', (e: MouseEvent) => {
       this.drawing = true;
-      if(this.canvasState === ""){
+      if (this.canvasState === "") {
         console.log("primer contacto")
         this.canvasState = this.canvass.toDataURL()
       }
@@ -122,6 +142,7 @@ export class EditorComponent {
     canvasEl.addEventListener('mousemove', (e: MouseEvent) => {
       if (this.drawing) {
         this.draw(this.translatedX(this.lastX), this.translatedY(this.lastY), this.translatedX(e.clientX - canvasEl.offsetLeft), this.translatedY(e.clientY - canvasEl.offsetTop));
+        
         this.lastX = e.clientX - canvasEl.offsetLeft;
         this.lastY = e.clientY - canvasEl.offsetTop;
       }
@@ -132,14 +153,24 @@ export class EditorComponent {
       let c = this.canvass.toDataURL();
       this.canvasBackup.push(this.canvasState);
       this.canvasState = c;
-
+      if(this.haySala){
+        let msg:any ={
+          "action":"stroke",
+          "user":this.usuarioService.UsuarioLogeado,
+          "data": this.lastStrokes
+        } 
+        this.ws.send(JSON.stringify(<JSON>msg))
+      }
     });
 
     canvasEl.addEventListener('mouseleave', () => {
       this.drawing = false;
+      let c = this.canvass.toDataURL();
+      this.canvasBackup.push(this.canvasState);
+      this.canvasState = c;
     });
 
-    setTimeout(()=>{this.cargando = false},2000)
+    setTimeout(() => { this.cargando = false }, 2000)
   }
 
 
@@ -156,6 +187,16 @@ export class EditorComponent {
   }
 
   draw(x1: number, y1: number, x2: number, y2: number) {
+    this.context.beginPath();
+    this.context.moveTo(x1, y1);
+    this.context.lineTo(x2, y2);
+    this.context.stroke();
+    if(this.haySala){
+      this.lastStrokes.push([x1,y1,x2,y2])
+    }
+  }
+
+  drawUpdate(x1: number, y1: number, x2: number, y2: number) {
     this.context.beginPath();
     this.context.moveTo(x1, y1);
     this.context.lineTo(x2, y2);
@@ -218,50 +259,50 @@ export class EditorComponent {
 
   guardarCambios() {
     this.cargando = true;
-    new Promise((resolve,reject)=>{
-      this.canvass.toBlob(async (blob) =>{
-        if(blob){
-          await this.firebaseService.guardarCambios(blob,this.name,this.usuarioService.UsuarioLogeado,this.canvasState)
+    new Promise((resolve, reject) => {
+      this.canvass.toBlob(async (blob) => {
+        if (blob) {
+          await this.firebaseService.guardarCambios(blob, this.name, this.usuarioService.UsuarioLogeado, this.canvasState)
           resolve(true)
         }
       })
-    }).then((result)=>[
+    }).then((result) => [
       this.cargando = false
     ])
   }
 
-  abrirSala(){
+  abrirSala() {
     this.ws = new WebSocket("ws://localhost:8999")
     this.ws.onopen = () => {
-      let openRequest : any = {
+      let openRequest: any = {
         "action": "open",
-        "user" : "diego.felipe.gamez@gmail.com",
-        "canvasUrl" : this.canvass.toDataURL()
-        }
+        "user": "diego.felipe.gamez@gmail.com",
+        "canvasUrl": this.canvass.toDataURL()
+      }
       this.cargando = true;
       this.ws.send(JSON.stringify(<JSON>openRequest))
     }
-    this.ws.onmessage = (event:MessageEvent) => {
+    this.ws.onmessage = (event: MessageEvent) => {
       let response = JSON.parse(event.data)
       //abrir sala
       console.log(response["res"])
-      if(response["action"] == "open"){
+      if (response["action"] == "open") {
         console.log("detecto action open")
-        if (response["res"] == "success"){
+        if (response["res"] == "success") {
           console.log("abriendo sala")
           this.idSala = response["code"]
           this.haySala = true;
           this.esOwner = true;
           this.cargando = false;
           this.integrantes.push(this.usuarioService.UsuarioLogeado)
-          console.log("se ha iniciado la sesion usando el id " +this.idSala)
+          console.log("se ha iniciado la sesion usando el id " + this.idSala)
           this.empezarSala()
         }
       }
     }
   }
 
-  empezarSala(){
+  empezarSala() {
 
   }
 }

@@ -43,6 +43,7 @@ wss.on('connection', function (ws) {
                 "code": sala.id
             };
             ws.send(JSON.stringify(message_1));
+            //al buscar una sala
         }
         else if (response["action"] == "exist") {
             var msg = void 0;
@@ -57,18 +58,22 @@ wss.on('connection', function (ws) {
                 };
             }
             ws.send(JSON.stringify(msg));
+            //al conectarse a una sala
         }
         else if (response["action"] == "connect") {
             listaSalas[response["idsala"]].integrantes.set(response["user"], ws);
-        }
-        else {
-            ws.send("y yo te odio a ti :)");
+            var msg = {
+                "action": "connect",
+                "res": "success",
+                "canvasUrl": listaSalas[response["idsala"]].canvas
+            };
+            ws.send(JSON.stringify(msg));
         }
     });
 });
-//start our server
+//Iniciar el Servidor
 server.listen(process.env.PORT || 8999, function () {
-    console.log("Server started on port ".concat(server.address().port, " :)"));
+    console.log("Servidor esta escuchando en el puerto ".concat(server.address().port, " :)"));
 });
 function encontrarSala(id) {
     for (var _i = 0, listaSalas_1 = listaSalas; _i < listaSalas_1.length; _i++) {

@@ -24,8 +24,7 @@ class Sala{
     owner:[string,WebSocket]
     canvas:string
     lastUpdate:number
-    integrantes: Map<string,WebSocket> = new Map<string,WebSocket>()
-    updateList:Array<[number,number,number]> = []
+    integrantes: Map<string,WebSocket> = new Map()
 }
 
 let listaSalas : Array<Sala> = []
@@ -53,6 +52,7 @@ wss.on('connection', (ws: WebSocket) => {
                 
             }
             ws.send(JSON.stringify(message))
+        //al buscar una sala
         }else if(response["action"] == "exist"){
             let msg:any
             if(encontrarSala(response["idsala"])){
@@ -65,6 +65,7 @@ wss.on('connection', (ws: WebSocket) => {
                 }
             }
             ws.send(JSON.stringify(msg))
+        //al conectarse a una sala
         }else if(response["action"] == "connect"){
             listaSalas[response["idsala"]].integrantes.set(response["user"],ws)
             let msg:any =
@@ -74,14 +75,17 @@ wss.on('connection', (ws: WebSocket) => {
                 "canvasUrl": listaSalas[response["idsala"]].canvas
             }
             ws.send(JSON.stringify(msg))
+        //al enviar un trazo
+        }else if(response["action"] == "stroke"){
+            
         }
     });
 
 });
 
-//start our server
+//Iniciar el Servidor
 server.listen(process.env.PORT || 8999, () => {
-    console.log(`Server started on port ${(server.address() as WebSocket.AddressInfo).port} :)`);
+    console.log(`Servidor esta escuchando en el puerto ${(server.address() as WebSocket.AddressInfo).port} :)`);
 });
 
 function encontrarSala(id:number){
