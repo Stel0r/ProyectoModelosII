@@ -154,3 +154,28 @@
     z-index: 210;
 
 }
+
+.nombre-sala{
+    background-color: #282f36;
+}
+
+.txt1{
+    margin:0px;
+    text-align: center;
+    color: #7f8f9e;
+    font-size: 1em;
+}
+
+.txt2{
+    margin:0px;
+    color: white;
+    text-align: center;
+    font-size: 1.5em;
+}
+
+.sep-int{
+    color: white;
+    font-size: 1.2em;
+    text-align: center;
+    background-color: #333c44;
+}

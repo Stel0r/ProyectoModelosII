@@ -28,8 +28,12 @@
 <div class="ventana">
     <canvas class="canvas" id="canvas" #myCanvas></canvas>
 </div>
-<div class="barra-usuarios">
-    <div class="panel-der">
-        <button></button>
+<div  class="barra-usuarios">
+    <div *ngIf = "this.haySala" class="panel-der">
+        <div class = "nombre-sala">
+            <p class="txt1">estas conectado a</p>
+            <p class="txt2">Sala {{this.idSala}}</p>
+        </div>
+        <div class="sep-int">Integrantes</div>
     </div>
 </div>
