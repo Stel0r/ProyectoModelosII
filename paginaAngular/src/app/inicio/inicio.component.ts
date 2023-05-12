@@ -90,6 +90,30 @@ export class InicioComponent {
   }
 
   conectarSala(){
+    let input: HTMLInputElement = document.getElementById("salaID")! as HTMLInputElement
+
+    if(input.value != ""){
+      let ws : WebSocket = new WebSocket("ws://localhost:8999")
+      ws.onopen = () => {
+      ws.onmessage = (event) => {
+        let response = JSON.parse(event.data)
+        if(response["res"] == "found"){
+          this.router.navigate(["/editor/join",input.value])
+          ws.close()
+        }else if(response["res"] == "not found"){
+          console.log("sala no existe")
+        }
+      }
+      console.log("enviando request")
+      let message:any = {
+        "action" : "exist",
+        "user" : this.usuarioServicio.UsuarioLogeado,
+        "idsala" : input.value
+      }
+      ws.send(JSON.stringify(<JSON>message))
+    }
+    }
+
     
   }
 }

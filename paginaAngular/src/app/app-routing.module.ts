@@ -17,6 +17,9 @@ const routes: Routes = [
   },
   {
     path:'editor/:name', component:EditorComponent
+  },
+  {
+    path:'editor/join/:id', component:EditorComponent
   }
 ];
 

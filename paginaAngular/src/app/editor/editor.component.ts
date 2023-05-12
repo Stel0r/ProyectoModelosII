@@ -32,6 +32,7 @@ export class EditorComponent {
   idSala:number
   haySala:boolean = false;
   integrantes:Array<string> = []
+  esOwner : boolean = false
   
 
 
@@ -53,7 +54,24 @@ export class EditorComponent {
       this.router.navigate(['/'])
     }
     this.activatedRoute.params.subscribe((params)=>{
-      this.name = params['name']
+      if(params['name']){
+        this.name = params['name']
+      }else if (params['id']){
+        this.haySala = true;
+        this.esOwner = false;
+        this.ws = new WebSocket("ws://localhost:8999")
+        this.ws.onopen = () => {
+          let message:any = {
+            "action":"connect",
+            "user":this.usuarioService.UsuarioLogeado,
+            "idsala": params["id"] 
+          }
+          this.ws.send(JSON.stringify(<JSON>message))
+        }
+        this.ws.onmessage = () => {
+            
+        }
+      }
     })
 
   }
@@ -233,6 +251,7 @@ export class EditorComponent {
           console.log("abriendo sala")
           this.idSala = response["code"]
           this.haySala = true;
+          this.esOwner = true;
           this.cargando = false;
           this.integrantes.push(this.usuarioService.UsuarioLogeado)
           console.log("se ha iniciado la sesion usando el id " +this.idSala)
