@@ -2,7 +2,7 @@ import * as express from 'express';
 import * as http from 'http';
 import * as WebSocket from 'ws';
 
-const { createCanvas, loadImage, Image,context } = require('canvas')
+const { createCanvas, loadImage, Image, context } = require('canvas')
 
 const app = express();
 
@@ -61,8 +61,8 @@ wss.on('connection', (ws: WebSocket) => {
             let message: any = {
                 "action": "open",
                 "res": "success",
-                "code": sala.id
-
+                "code": sala.id,
+                "integrantes": Array.from(sala.integrantes.keys())
             }
             ws.send(JSON.stringify(message))
             //al buscar una sala
@@ -85,26 +85,53 @@ wss.on('connection', (ws: WebSocket) => {
             {
                 "action": "connect",
                 "res": "success",
-                "canvasUrl": listaSalas[response["idsala"]].canvas.toDataURL()
+                "canvasUrl": listaSalas[response["idsala"]].canvas.toDataURL(),
+                "integrantes": Array.from(listaSalas[response["idsala"]].integrantes.keys())
             }
             ws.send(JSON.stringify(msg))
+            //enviar aviso de que un nuevo miembro ingresa
+            listaSalas[response["idsala"]].integrantes.forEach((socket) => {
+                if (socket != ws) {
+                    let res: any = {
+                        "action": "newMember",
+                        "integrantes": Array.from(listaSalas[response["idsala"]].integrantes.keys()),
+                    }
+                    socket.send(JSON.stringify(res))
+                }
+            })
             //al enviar un trazo
         } else if (response["action"] == "stroke") {
             //envia la info a todos los conectados a la sala
 
-            listaSalas[response["idsala"]].integrantes.forEach((socket, key) => {
+            listaSalas[response["idsala"]].integrantes.forEach((socket) => {
                 if (socket != ws) {
                     let res: any = {
                         "action": "stroke",
                         "user": response["user"],
                         "data": response["data"]
                     }
-                    drawUpdate(response["data"] as Array<[number, number, number, number, string,number]>,listaSalas[response["idsala"]].canvas.getContext('2d')!)
+                    drawUpdate(response["data"] as Array<[number, number, number, number, string, number]>, listaSalas[response["idsala"]].canvas.getContext('2d')!)
                     socket.send(JSON.stringify(res))
                 }
             })
         }
     });
+    ws.on('close', () => {
+        listaSalas.forEach((sala) => {
+            sala.integrantes.forEach((v, k) => {
+                if (v == ws) {
+                    sala.integrantes.delete(k)
+                    sala.integrantes.forEach((socket) => {
+                        let res: any = {
+                            "action": "newMember",
+                            "integrantes": Array.from(sala.integrantes.keys()),
+                        }
+                        socket.send(JSON.stringify(res))
+                    })
+                }
+            })
+        })
+    })
 
 });
 
@@ -123,7 +150,7 @@ function encontrarSala(id: number) {
     return false
 }
 
-function drawUpdate(update: Array<[number, number, number, number, string,number]>,context:CanvasRenderingContext2D) {
+function drawUpdate(update: Array<[number, number, number, number, string, number]>, context: CanvasRenderingContext2D) {
     for (let list of update) {
         context.beginPath();
         context.moveTo(list[0], list[1]);

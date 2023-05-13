@@ -46,7 +46,7 @@ export class EditorComponent {
   cargando: boolean = true;
   puedeGuardar:boolean = true;
 
-  constructor(private storage: Storage, private usuarioService: UsuarioService, private firebaseService: FirebaseService, private activatedRoute: ActivatedRoute, private router: Router) {
+  constructor(private usuarioService: UsuarioService, private firebaseService: FirebaseService, private activatedRoute: ActivatedRoute, private router: Router) {
   }
 
 
@@ -65,14 +65,20 @@ export class EditorComponent {
         this.puedeGuardar = false
       }
     })
-
   }
+
+
+  ngOnDestroy(){
+    if(this.ws){
+      this.ws.close()
+    }
+  }
+
   ngAfterViewInit() {
     this.firestore = getFirestore();
     const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
     this.canvass = canvasEl;
     this.context = canvasEl.getContext('2d')!;
-
     canvasEl.width = 1920;
     canvasEl.height = 1080;
     if (!this.haySala) {
@@ -102,7 +108,6 @@ export class EditorComponent {
       }
       this.ws.onmessage = (event) => {
         let response = JSON.parse(event.data)
-        console.log(response["action"])
         //solicitar conexion a sala
         if (response["action"] == "connect") {
           if (response["res"] == "success") {
@@ -117,11 +122,15 @@ export class EditorComponent {
             };
             console.log(this.canvasCompartido)
             img.src = this.canvasCompartido
+            this.integrantes = response["integrantes"] as Array<string>
+            console.log(this.integrantes)
           }
         }else if(response["action"] == "stroke"){
           console.log("stroke received")
           console.log(response["data"])
           this.drawUpdate(response["data"] as Array<[number,number,number,number,string,number]>)
+        }else if(response["action"] == "newMember"){
+          this.integrantes = response["integrantes"] as Array<string>
         }
       }
 
@@ -318,10 +327,11 @@ export class EditorComponent {
         if (response["res"] == "success") {
           console.log("abriendo sala")
           this.idSala = response["code"]
+          this.integrantes = response["integrantes"] as Array<string>
+          console.log(this.integrantes)
           this.haySala = true;
           this.esOwner = true;
           this.cargando = false;
-          this.integrantes.push(this.usuarioService.UsuarioLogeado)
           console.log("se ha iniciado la sesion usando el id " + this.idSala)
           this.empezarSala()
         }
@@ -329,6 +339,8 @@ export class EditorComponent {
         console.log("stroke received")
         console.log(response["data"])
         this.drawUpdate(response["data"] as Array<[number,number,number,number,string,number]>)
+      }else if(response["action"] == "newMember"){
+        this.integrantes = response["integrantes"] as Array<string>
       }
     }
   }

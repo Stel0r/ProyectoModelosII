@@ -49,7 +49,8 @@ wss.on('connection', function (ws) {
             var message_1 = {
                 "action": "open",
                 "res": "success",
-                "code": sala.id
+                "code": sala.id,
+                "integrantes": Array.from(sala.integrantes.keys())
             };
             ws.send(JSON.stringify(message_1));
             //al buscar una sala
@@ -74,14 +75,25 @@ wss.on('connection', function (ws) {
             var msg = {
                 "action": "connect",
                 "res": "success",
-                "canvasUrl": listaSalas[response["idsala"]].canvas.toDataURL()
+                "canvasUrl": listaSalas[response["idsala"]].canvas.toDataURL(),
+                "integrantes": Array.from(listaSalas[response["idsala"]].integrantes.keys())
             };
             ws.send(JSON.stringify(msg));
+            //enviar aviso de que un nuevo miembro ingresa
+            listaSalas[response["idsala"]].integrantes.forEach(function (socket) {
+                if (socket != ws) {
+                    var res = {
+                        "action": "newMember",
+                        "integrantes": Array.from(listaSalas[response["idsala"]].integrantes.keys()),
+                    };
+                    socket.send(JSON.stringify(res));
+                }
+            });
             //al enviar un trazo
         }
         else if (response["action"] == "stroke") {
             //envia la info a todos los conectados a la sala
-            listaSalas[response["idsala"]].integrantes.forEach(function (socket, key) {
+            listaSalas[response["idsala"]].integrantes.forEach(function (socket) {
                 if (socket != ws) {
                     var res = {
                         "action": "stroke",
@@ -93,6 +105,22 @@ wss.on('connection', function (ws) {
                 }
             });
         }
+    });
+    ws.on('close', function () {
+        listaSalas.forEach(function (sala) {
+            sala.integrantes.forEach(function (v, k) {
+                if (v == ws) {
+                    sala.integrantes.delete(k);
+                    sala.integrantes.forEach(function (socket) {
+                        var res = {
+                            "action": "newMember",
+                            "integrantes": Array.from(sala.integrantes.keys()),
+                        };
+                        socket.send(JSON.stringify(res));
+                    });
+                }
+            });
+        });
     });
 });
 //Iniciar el Servidor

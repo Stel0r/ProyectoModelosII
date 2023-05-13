@@ -76,6 +76,7 @@
 
 .panel-der{
     margin-top: 56px;
+    overflow: hidden;
 }
 
 
@@ -178,4 +179,17 @@
     font-size: 1.2em;
     text-align: center;
     background-color: #333c44;
+}
+
+.integrante{
+    color: white;
+    display:flex;
+    justify-content:space-around;
+    align-items: center;
+    height: 80px;
+    padding: 15px;
+}
+
+.img-integrante{
+    width: 50px;
 }

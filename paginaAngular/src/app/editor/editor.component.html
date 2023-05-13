@@ -35,5 +35,11 @@
             <p class="txt2">Sala {{this.idSala}}</p>
         </div>
         <div class="sep-int">Integrantes</div>
+        <div class="lista-integrantes">
+            <div *ngFor="let a of this.integrantes" class = "integrante">
+                <img class="img-integrante" src="assets/img/profile.png" alt="">
+                <span>{{a}}</span>
+            </div>
+        </div>
     </div>
 </div>
