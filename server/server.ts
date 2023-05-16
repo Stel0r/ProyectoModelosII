@@ -102,7 +102,7 @@ wss.on('connection', (ws: WebSocket) => {
             //al enviar un trazo
         } else if (response["action"] == "stroke") {
             //envia la info a todos los conectados a la sala
-
+            drawUpdate(response["data"] as Array<[number, number, number, number, string, number]>, listaSalas[response["idsala"]].canvas.getContext('2d')!)
             listaSalas[response["idsala"]].integrantes.forEach((socket) => {
                 if (socket != ws) {
                     let res: any = {
@@ -110,10 +110,10 @@ wss.on('connection', (ws: WebSocket) => {
                         "user": response["user"],
                         "data": response["data"]
                     }
-                    drawUpdate(response["data"] as Array<[number, number, number, number, string, number]>, listaSalas[response["idsala"]].canvas.getContext('2d')!)
                     socket.send(JSON.stringify(res))
                 }
             })
+            
         }
     });
     ws.on('close', () => {

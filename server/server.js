@@ -93,6 +93,7 @@ wss.on('connection', function (ws) {
         }
         else if (response["action"] == "stroke") {
             //envia la info a todos los conectados a la sala
+            drawUpdate(response["data"], listaSalas[response["idsala"]].canvas.getContext('2d'));
             listaSalas[response["idsala"]].integrantes.forEach(function (socket) {
                 if (socket != ws) {
                     var res = {
@@ -100,7 +101,6 @@ wss.on('connection', function (ws) {
                         "user": response["user"],
                         "data": response["data"]
                     };
-                    drawUpdate(response["data"], listaSalas[response["idsala"]].canvas.getContext('2d'));
                     socket.send(JSON.stringify(res));
                 }
             });
