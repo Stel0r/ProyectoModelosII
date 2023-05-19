@@ -22,7 +22,7 @@
             <button class="pencil-op-right" (click) = "bajarTamanoEraser()"></button>
             <button class="pencil-op-left" (click) = "subirTamanoEraser()"></button>
         </div>
-        <button *ngIf = "this.haySala" class="tool-button undo" (click) = 'this.undo()'><img src="assets/svg/undo.svg" alt="" class="pencil-img"></button>
+        <button *ngIf = "!this.haySala" class="tool-button undo" (click) = 'this.undo()'><img src="assets/svg/undo.svg" alt="" class="pencil-img"></button>
     </div>
 </div>
 <div class="ventana">
