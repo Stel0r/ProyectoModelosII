@@ -58,9 +58,16 @@ wss.on('connection', function (ws) {
         else if (response["action"] == "exist") {
             var msg = void 0;
             if (encontrarSala(response["idsala"])) {
-                msg = {
-                    "res": "found"
-                };
+                if (!listaSalas[response["idsala"]].integrantes.has(response["user"])) {
+                    msg = {
+                        "res": "found"
+                    };
+                }
+                else {
+                    msg = {
+                        "res": "Already in"
+                    };
+                }
             }
             else {
                 msg = {

@@ -69,9 +69,16 @@ wss.on('connection', (ws: WebSocket) => {
         } else if (response["action"] == "exist") {
             let msg: any
             if (encontrarSala(response["idsala"])) {
-                msg = {
-                    "res": "found"
+                if (!listaSalas[response["idsala"]].integrantes.has(response["user"])){
+                    msg = {
+                        "res": "found"
+                    }
+                }else{
+                    msg = {
+                        "res": "Already in"
+                    }
                 }
+                
             } else {
                 msg = {
                     "res": "not found"

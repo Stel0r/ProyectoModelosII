@@ -90,6 +90,7 @@ export class InicioComponent {
   }
 
   conectarSala(){
+    this.nuevoErrorB = false;
     let input: HTMLInputElement = document.getElementById("salaID")! as HTMLInputElement
 
     if(input.value != ""){
@@ -101,7 +102,11 @@ export class InicioComponent {
           this.router.navigate(["/editor/join",input.value])
           ws.close()
         }else if(response["res"] == "not found"){
-          console.log("sala no existe")
+          this.nuevoErrorB = true;
+          this.nuevoError = 'No se ha encontrado una sala con ese ID'
+        }else if(response["res"] == "Already in"){
+          this.nuevoErrorB = true;
+          this.nuevoError = 'tu usuario ya esta conectado a esta sala'
         }
       }
       console.log("enviando request")
